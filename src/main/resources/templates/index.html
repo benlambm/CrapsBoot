@@ -12,6 +12,11 @@
 </head>
 <body class="container py-5 text-center">
 
+    <!-- Mute Toggle -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1000;">
+        <button id="mute-toggle" class="btn btn-dark btn-sm fs-4 border-0" title="Toggle Sound" style="opacity: 0.7;"></button>
+    </div>
+
     <h1 class="mb-4 text-warning fw-bold">&#127922; Casino Craps &#127922;</h1>
 
     <div class="row justify-content-center">
@@ -28,14 +33,96 @@
 
                 <h4 id="game-message" class="mb-4 fade-in delay-2" th:text="${game.message}">Message here</h4>
 
+                <!-- Bet Selector (come-out roll only) -->
+                <div class="mb-3" th:if="${game.point == 0}">
+                    <label class="form-label fw-bold text-warning">Choose Your Bet:</label>
+                    <div class="d-flex justify-content-center gap-2 mb-2" id="bet-chips">
+                        <button type="button" class="btn btn-sm bet-chip"
+                                th:classappend="${game.currentBet == 5} ? 'btn-warning' : 'btn-outline-warning'"
+                                data-bet="5" th:disabled="${5 > game.bankroll}" onclick="selectBet(this)">$5</button>
+                        <button type="button" class="btn btn-sm bet-chip"
+                                th:classappend="${game.currentBet == 10} ? 'btn-warning' : 'btn-outline-warning'"
+                                data-bet="10" th:disabled="${10 > game.bankroll}" onclick="selectBet(this)">$10</button>
+                        <button type="button" class="btn btn-sm bet-chip"
+                                th:classappend="${game.currentBet == 25} ? 'btn-warning' : 'btn-outline-warning'"
+                                data-bet="25" th:disabled="${25 > game.bankroll}" onclick="selectBet(this)">$25</button>
+                        <button type="button" class="btn btn-sm bet-chip"
+                                th:classappend="${game.currentBet == 50} ? 'btn-warning' : 'btn-outline-warning'"
+                                data-bet="50" th:disabled="${50 > game.bankroll}" onclick="selectBet(this)">$50</button>
+                    </div>
+                    <div class="input-group input-group-sm w-50 mx-auto">
+                        <span class="input-group-text bg-dark text-warning border-warning">$</span>
+                        <input type="number" id="custom-bet" class="form-control bg-dark text-white border-warning text-center"
+                               th:value="${game.currentBet}" min="5" th:max="${game.bankroll}" step="5" placeholder="Custom">
+                    </div>
+                </div>
+                <!-- Bet Locked (point phase) -->
+                <div class="mb-3" th:if="${game.point > 0}">
+                    <span class="badge bg-warning text-dark fs-6">Bet Locked: $<span th:text="${game.currentBet}"></span></span>
+                </div>
+
+                <!-- Odds Bet (point phase, not yet placed) -->
+                <div class="mb-3 p-2 border border-info rounded" th:if="${game.point > 0 and game.oddsBet == 0}">
+                    <label class="form-label fw-bold text-info">Place Odds Bet (pays <span th:text="${game.oddsRatio}"></span>):</label>
+                    <form th:action="@{/place-odds}" method="post" class="d-flex justify-content-center gap-2 align-items-center flex-wrap">
+                        <button type="submit" name="amount" th:value="${game.currentBet}"
+                                class="btn btn-sm btn-outline-info" th:text="'$' + ${game.currentBet} + ' (1x)'"></button>
+                        <button type="submit" name="amount" th:value="${game.currentBet * 2}"
+                                class="btn btn-sm btn-outline-info" th:text="'$' + ${game.currentBet * 2} + ' (2x)'"
+                                th:disabled="${game.currentBet * 2 > game.maxOddsBet}"></button>
+                        <button type="submit" name="amount" th:value="${game.currentBet * 3}"
+                                class="btn btn-sm btn-outline-info" th:text="'$' + ${game.currentBet * 3} + ' (3x)'"
+                                th:disabled="${game.currentBet * 3 > game.maxOddsBet}"></button>
+                        <button type="submit" name="amount" value="0" class="btn btn-sm btn-outline-secondary">Skip</button>
+                    </form>
+                </div>
+                <!-- Odds Bet Placed -->
+                <div class="mb-2" th:if="${game.point > 0 and game.oddsBet > 0}">
+                    <span class="badge bg-info text-dark">Odds Bet: $<span th:text="${game.oddsBet}"></span> (<span th:text="${game.oddsRatio}"></span>)</span>
+                </div>
+
                 <form id="roll-form" th:action="@{/roll}" method="post" class="d-inline">
-                    <button id="roll-btn" type="submit" class="btn btn-warning btn-lg fw-bold px-5 pulse-glow">Roll Dice ($10)</button>
+                    <input type="hidden" name="bet" id="bet-value" th:value="${game.currentBet}">
+                    <button id="roll-btn" type="submit" class="btn btn-warning btn-lg fw-bold px-5 pulse-glow"
+                            th:text="'Roll Dice ($' + ${game.currentBet} + ')'">Roll Dice ($10)</button>
                 </form>
+            </div>
+
+            <!-- Roll History Strip -->
+            <div class="roll-history-strip mb-3 p-2 bg-dark rounded" th:if="${not #lists.isEmpty(game.rollHistory)}">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-muted">Roll History</small>
+                    <small th:if="${game.absStreak >= 2}"
+                           th:classappend="${game.onWinStreak} ? 'text-success fw-bold' : 'text-danger fw-bold'">
+                        <span th:if="${game.onWinStreak}" th:text="'&#128293; ' + ${game.absStreak} + ' wins in a row!'"></span>
+                        <span th:if="${game.onLossStreak}" th:text="'&#10052;&#65039; ' + ${game.absStreak} + ' losses in a row'"></span>
+                    </small>
+                </div>
+                <div class="d-flex gap-1 overflow-auto roll-history-scroll">
+                    <div th:each="roll : ${game.rollHistory}"
+                         class="roll-badge text-center flex-shrink-0"
+                         th:classappend="${roll.cssClass()}">
+                        <div class="roll-sum" th:text="${roll.sum}"></div>
+                        <div class="roll-icon" th:text="${roll.icon()}"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="d-flex justify-content-between bg-dark p-3 rounded mb-4">
                 <span class="fs-5">Wins: <span th:text="${game.wins}" class="text-success fw-bold"></span></span>
                 <span class="fs-5">Losses: <span th:text="${game.losses}" class="text-danger fw-bold"></span></span>
+            </div>
+
+            <!-- Achievements earned this session -->
+            <div class="mb-3" th:if="${not game.unlockedAchievements.isEmpty()}">
+                <small class="text-muted">Achievements Earned:</small>
+                <div class="d-flex justify-content-center gap-1 flex-wrap mt-1">
+                    <span th:each="ach : ${game.unlockedAchievements}"
+                          class="badge bg-dark border border-warning achievement-badge"
+                          th:title="${ach.description}"
+                          th:text="${ach.icon + ' ' + ach.displayName}">
+                    </span>
+                </div>
             </div>
 
             <div class="d-flex justify-content-center gap-3">

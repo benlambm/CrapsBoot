@@ -8,11 +8,33 @@
 </head>
 <body class="container py-5 text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 100vh;">
 
+    <!-- Mute Toggle -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1000;">
+        <button id="mute-toggle" class="btn btn-dark btn-sm fs-4 border-0" title="Toggle Sound" style="opacity: 0.7;"></button>
+    </div>
+
     <h1 class="display-3 text-danger fw-bold mb-4 slam-in">GAME OVER</h1>
 
     <div class="card bg-dark text-white border-warning p-5 shadow-lg w-100 fade-in delay-2" style="max-width: 500px;">
         <h2 class="mb-3">Final Bankroll: $<span th:text="${score}" class="text-success"></span></h2>
         <h4 class="mb-4 text-secondary">Total Wins: <span th:text="${wins}"></span></h4>
+
+        <!-- Achievements Section -->
+        <div class="mb-4" th:if="${not achievements.isEmpty()}">
+            <h5 class="text-warning">Achievements Unlocked</h5>
+            <div class="d-flex flex-column gap-2 align-items-center">
+                <div th:each="ach : ${achievements}" class="d-flex align-items-center gap-2 text-start">
+                    <span class="fs-3" th:text="${ach.icon}"></span>
+                    <div>
+                        <strong th:text="${ach.displayName}"></strong>
+                        <br><small class="text-muted" th:text="${ach.description}"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-4 text-muted" th:if="${achievements.isEmpty()}">
+            <small>No achievements unlocked this session. Try harder next time!</small>
+        </div>
 
         <form th:action="@{/save-score}" method="post">
             <div class="mb-4">

@@ -32,8 +32,11 @@ public class CrapsController {
     }
 
     @PostMapping("/roll")
-    public String rollDice() {
+    public String rollDice(@RequestParam(required = false) Integer bet) {
         if (gameSession.getBankroll() > 0) {
+            if (bet != null && gameSession.getPoint() == 0) {
+                gameSession.setCurrentBet(bet);
+            }
             int d1 = ThreadLocalRandom.current().nextInt(1, 7);
             int d2 = ThreadLocalRandom.current().nextInt(1, 7);
             gameSession.roll(d1, d2);
@@ -41,17 +44,28 @@ public class CrapsController {
         return "redirect:/";
     }
 
+    @PostMapping("/place-odds")
+    public String placeOddsBet(@RequestParam int amount) {
+        gameSession.placeOddsBet(amount);
+        return "redirect:/";
+    }
+
     @GetMapping("/game-over")
     public String gameOver(Model model) {
         model.addAttribute("score", gameSession.getBankroll());
         model.addAttribute("wins", gameSession.getWins());
+        model.addAttribute("achievements", gameSession.getUnlockedAchievements());
         return "game-over";
     }
 
     @PostMapping("/save-score")
     public String saveScore(@RequestParam String playerName) {
         if (playerName != null && !playerName.trim().isEmpty()) {
-            LeaderboardEntry entry = new LeaderboardEntry(playerName.trim(), gameSession.getBankroll());
+            LeaderboardEntry entry = new LeaderboardEntry(
+                    playerName.trim(),
+                    gameSession.getBankroll(),
+                    gameSession.getAchievementIds()
+            );
             leaderboardRepository.save(entry);
         }
         gameSession.reset();

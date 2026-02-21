@@ -1,0 +1,14 @@
+# Maven
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db

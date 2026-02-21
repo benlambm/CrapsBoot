@@ -230,3 +230,37 @@
 .achievement-new {
     animation: achievement-pop 0.5s ease-out;
 }
+
+/* ===== Auto-Agent Toggle ===== */
+@keyframes agent-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(13, 202, 240, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 18px rgba(13, 202, 240, 0.8), 0 0 35px rgba(13, 202, 240, 0.3);
+    }
+}
+
+.auto-agent-active {
+    animation: agent-pulse 1.2s ease-in-out infinite;
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+    border-color: #0dcaf0 !important;
+}
+
+.agent-indicator {
+    font-size: 0.85rem;
+    color: #0dcaf0;
+    animation: agent-pulse 1.2s ease-in-out infinite;
+}
+
+.agent-indicator::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #0dcaf0;
+    margin-right: 6px;
+    vertical-align: middle;
+}

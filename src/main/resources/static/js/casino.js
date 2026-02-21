@@ -212,4 +212,116 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.slide-in-row').forEach(function (row, index) {
         row.style.animationDelay = (index * 0.15) + 's';
     });
+
+    // ===== Auto-Agent Mode =====
+    var agentActive = localStorage.getItem('craps-autoagent') === 'on';
+    var agentToggleBtn = document.getElementById('auto-agent-toggle');
+    var agentStatus = document.getElementById('agent-status');
+
+    function calculateAgentBet(bankroll, streak) {
+        // Conservative intelligence: reduce bet on loss streaks
+        if (streak <= -3) return 5;
+        // Scale bet based on bankroll
+        if (bankroll <= 20) return 5;
+        if (bankroll <= 75) return 5;
+        if (bankroll <= 150) return 10;
+        if (bankroll <= 300) return 15;
+        return 25;
+    }
+
+    function syncAgentUI() {
+        if (agentToggleBtn) {
+            if (agentActive) {
+                agentToggleBtn.textContent = 'Auto-Agent: ON';
+                agentToggleBtn.classList.remove('btn-outline-info');
+                agentToggleBtn.classList.add('auto-agent-active');
+            } else {
+                agentToggleBtn.textContent = 'Auto-Agent: OFF';
+                agentToggleBtn.classList.remove('auto-agent-active');
+                agentToggleBtn.classList.add('btn-outline-info');
+            }
+        }
+        if (agentStatus) {
+            agentStatus.style.display = agentActive ? 'block' : 'none';
+        }
+    }
+
+    function runAutoAgent() {
+        if (!agentActive) return;
+
+        // Check if odds bet form is visible (point set, no odds yet)
+        var oddsForm = document.querySelector('[action$="/place-odds"]');
+        if (!oddsForm) {
+            // Thymeleaf uses th:action, check for any form posting to /place-odds
+            document.querySelectorAll('form').forEach(function (f) {
+                if (f.action && f.action.indexOf('/place-odds') !== -1) {
+                    oddsForm = f;
+                }
+            });
+        }
+
+        if (oddsForm) {
+            // Place 1x odds (first button in the odds form)
+            var oddsBtn = oddsForm.querySelector('button[name="amount"]');
+            if (oddsBtn) {
+                oddsBtn.click();
+                return;
+            }
+        }
+
+        // Set bet if on come-out roll
+        if (rollForm && rollBtn) {
+            var bankrollEl = document.getElementById('bankroll');
+            var bankroll = bankrollEl ? parseInt(bankrollEl.textContent) : 100;
+
+            // Read streak from the DOM
+            var streak = 0;
+            var streakEl = document.querySelector('.text-success.fw-bold small, .text-danger.fw-bold small');
+            // Parse streak from roll history section
+            var streakSpans = document.querySelectorAll('.roll-history-strip small');
+            streakSpans.forEach(function (s) {
+                var txt = s.textContent;
+                var match = txt.match(/(\d+)\s+wins/);
+                if (match) streak = parseInt(match[1]);
+                match = txt.match(/(\d+)\s+losses/);
+                if (match) streak = -parseInt(match[1]);
+            });
+
+            var agentBet = calculateAgentBet(bankroll, streak);
+
+            // Update bet value if on come-out (bet selector visible)
+            var betInput = document.getElementById('bet-value');
+            if (betInput) {
+                betInput.value = agentBet;
+                rollBtn.textContent = 'Roll Dice ($' + agentBet + ')';
+            }
+
+            // Trigger roll by dispatching submit event (reuses dice animation)
+            rollForm.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    }
+
+    // Toggle button handler
+    if (agentToggleBtn) {
+        agentToggleBtn.addEventListener('click', function () {
+            agentActive = !agentActive;
+            localStorage.setItem('craps-autoagent', agentActive ? 'on' : 'off');
+            syncAgentUI();
+            if (agentActive) {
+                setTimeout(runAutoAgent, 800);
+            }
+        });
+    }
+
+    // Deactivate agent on game-over page
+    if (document.querySelector('.slam-in')) {
+        agentActive = false;
+        localStorage.setItem('craps-autoagent', 'off');
+    }
+
+    // Initialize UI and auto-run if active
+    syncAgentUI();
+    if (agentActive && rollForm) {
+        setTimeout(runAutoAgent, 800);
+    }
 });

@@ -12,7 +12,6 @@ This is a Maven-based Spring Boot project (Java 21).
 - **Run a single test class:** `./mvnw test -Dtest=CrapsApplicationTests`
 - **Run a single test method:** `./mvnw test -Dtest=CrapsApplicationTests#testComeOutRoll_NaturalWins`
 
-Note: There is no Maven wrapper checked in yet; use `mvn` directly or add a wrapper with `mvn wrapper:wrapper`.
 
 ## Architecture
 

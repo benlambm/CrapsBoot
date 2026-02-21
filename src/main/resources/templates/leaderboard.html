@@ -3,11 +3,12 @@
 <head>
     <title>Leaderboard - Craps</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/casino.css}" rel="stylesheet">
     <style>body { background-color: #112233; color: white; }</style>
 </head>
 <body class="container py-5 text-center align-items-center">
 
-    <h1 class="display-4 text-warning fw-bold mb-5">&#127942; TOP 5 HIGH SCORES &#127942;</h1>
+    <h1 class="display-4 text-warning fw-bold mb-5 fade-in">&#127942; TOP 5 HIGH SCORES &#127942;</h1>
 
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -20,7 +21,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="leader, iterStat : ${leaders}">
+                    <tr th:each="leader, iterStat : ${leaders}" class="slide-in-row">
                         <td th:text="${iterStat.count}"></td>
                         <td th:text="${leader.playerName}" class="fw-bold"></td>
                         <td class="text-success">$<span th:text="${leader.score}"></span></td>
@@ -32,10 +33,11 @@
             </table>
 
             <form th:action="@{/reset}" method="post" class="mt-5">
-                <button type="submit" class="btn btn-warning btn-lg fw-bold px-5">Play Again</button>
+                <button type="submit" class="btn btn-warning btn-lg fw-bold px-5 pulse-glow">Play Again</button>
             </form>
         </div>
     </div>
 
+    <script th:src="@{/js/casino.js}"></script>
 </body>
 </html>

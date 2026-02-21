@@ -1,0 +1,166 @@
+/* ===== Pulsating Roll Button ===== */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2);
+        transform: scale(1.05);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 1.8s ease-in-out infinite;
+    transition: all 0.2s ease;
+}
+
+.pulse-glow:hover {
+    animation: none;
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 1), 0 0 50px rgba(255, 215, 0, 0.6), 0 0 75px rgba(255, 215, 0, 0.3);
+}
+
+.pulse-glow:active {
+    transform: scale(0.95);
+}
+
+/* ===== Dice Shake Animation ===== */
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-8px, -6px) rotate(-12deg); }
+    20% { transform: translate(8px, 4px) rotate(10deg); }
+    30% { transform: translate(-6px, 8px) rotate(-8deg); }
+    40% { transform: translate(6px, -8px) rotate(14deg); }
+    50% { transform: translate(-4px, 6px) rotate(-6deg); }
+    60% { transform: translate(8px, -4px) rotate(12deg); }
+    70% { transform: translate(-8px, -6px) rotate(-14deg); }
+    80% { transform: translate(4px, 8px) rotate(8deg); }
+    90% { transform: translate(-6px, -4px) rotate(-10deg); }
+}
+
+.shaking {
+    animation: shake 0.4s ease-in-out infinite;
+}
+
+/* ===== Fade-In-Up (page load reveal) ===== */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    opacity: 0;
+}
+
+.fade-in.loaded {
+    animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Staggered delays for cascading reveals */
+.fade-in.delay-1 { animation-delay: 0.1s; }
+.fade-in.delay-2 { animation-delay: 0.2s; }
+.fade-in.delay-3 { animation-delay: 0.3s; }
+.fade-in.delay-4 { animation-delay: 0.4s; }
+.fade-in.delay-5 { animation-delay: 0.5s; }
+
+/* ===== Card Border Shimmer ===== */
+@keyframes border-shimmer {
+    0%, 100% { border-color: #ffd700; }
+    50% { border-color: #ffec80; }
+}
+
+.shimmer-border {
+    animation: border-shimmer 3s ease-in-out infinite;
+}
+
+/* ===== Bankroll Glow ===== */
+@keyframes bankroll-glow {
+    0%, 100% { text-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+    50% { text-shadow: 0 0 16px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3); }
+}
+
+.bankroll-glow {
+    animation: bankroll-glow 2.5s ease-in-out infinite;
+}
+
+/* ===== Win Celebration ===== */
+@keyframes win-flash {
+    0% { text-shadow: none; transform: scale(1); }
+    30% { text-shadow: 0 0 20px rgba(40, 167, 69, 0.8), 0 0 40px rgba(40, 167, 69, 0.4); transform: scale(1.08); color: #28a745; }
+    100% { text-shadow: none; transform: scale(1); }
+}
+
+.win-message {
+    animation: win-flash 1s ease-out;
+}
+
+/* ===== Loss Commiseration ===== */
+@keyframes lose-flash {
+    0% { text-shadow: none; }
+    30% { text-shadow: 0 0 15px rgba(220, 53, 69, 0.7), 0 0 30px rgba(220, 53, 69, 0.3); color: #dc3545; }
+    100% { text-shadow: none; }
+}
+
+.lose-message {
+    animation: lose-flash 1s ease-out;
+}
+
+/* ===== Rolling State (button disabled during roll) ===== */
+.rolling-btn {
+    animation: none !important;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* ===== Dice container during roll ===== */
+.dice-rolling-overlay {
+    position: relative;
+}
+
+/* ===== Game Over page animations ===== */
+@keyframes slam-in {
+    0% {
+        opacity: 0;
+        transform: scale(2.5);
+        text-shadow: 0 0 80px rgba(220, 53, 69, 0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(0.9);
+    }
+    80% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 30px rgba(220, 53, 69, 0.4);
+    }
+}
+
+.slam-in {
+    animation: slam-in 0.8s ease-out forwards;
+}
+
+/* ===== Leaderboard row cascade ===== */
+@keyframes slide-in-row {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-row {
+    opacity: 0;
+    animation: slide-in-row 0.4s ease-out forwards;
+}
